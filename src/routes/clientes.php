@@ -6,7 +6,7 @@ $app = new \Slim\App;
 
 //Obtener todos los clientes
 $app->get('/api/clientes', function(Request $request, Response $response){
-    $consulta = "SELECT * FROM clientes";
+    $consulta = "SELECT * FROM cliente";
     try{
         // Instanciar la base de datos
         $db = new db();
@@ -30,7 +30,7 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
 
     $id = $request->getAttribute('id');
 
-    $consulta = "SELECT * FROM clientes WHERE id='$id'";
+    $consulta = "SELECT * FROM cliente WHERE NIT='$id'";
     try{
         // Instanciar la base de datos
         $db = new db();
@@ -52,60 +52,70 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
 
 // Agregar Cliente
 $app->post('/api/clientes/agregar', function(Request $request, Response $response){
+    $nit = $request->getParam('nit');
     $nombre = $request->getParam('nombre');
-    $apellidos = $request->getParam('apellidos');
-    $telefono = $request->getParam('telefono');
+    $apellido = $request->getParam('apellido');
+    $telefono = $request->getParam('Telefono');
     $email = $request->getParam('email');
     $direccion = $request->getParam('direccion');
-    $ciudad = $request->getParam('ciudad');
-    $departamento = $request->getParam('departamento');
+    $nombreCompleto = $request->getParam('nombreCompleto');
+    $clave = $request->getParam('clave');
 
 
-    $consulta = "INSERT INTO clientes (nombre, apellidos, telefono, email, direccion, ciudad, departamento) VALUES
-    (:nombre, :apellidos, :telefono, :email, :direccion, :ciudad, :departamento)";
-    try{
-        // Instanciar la base de datos
-        $db = new db();
-
-        // Conexión
-        $db = $db->conectar();
-        $stmt = $db->prepare($consulta);
-        $stmt->bindParam(':nombre', $nombre);
-        $stmt->bindParam(':apellidos',  $apellidos);
-        $stmt->bindParam(':telefono',      $telefono);
-        $stmt->bindParam(':email',      $email);
-        $stmt->bindParam(':direccion',    $direccion);
-        $stmt->bindParam(':ciudad',       $ciudad);
-        $stmt->bindParam(':departamento',      $departamento);
-        $stmt->execute();
-        echo '{"notice": {"text": "Cliente agregado"}';
-    } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+    //consulta si existe el nit para que no existan repetidos
+    $consulta = "SELECT * FROM cliente WHERE NIT='$nit'";
+    if($consulta==""){
+        
+        $consulta = "INSERT INTO cliente (Nombre, Apellido, Telefono, Email, Direccion, NIT, Clave, NombreCompleto) VALUES
+        (:nombre, :apellido, :telefono, :email, :direccion, :nit, :clave, :nombreCompleto)";
+        try{
+            // Instanciar la base de datos
+            $db = new db();
+    
+            // Conexión
+            $db = $db->conectar();
+            $stmt = $db->prepare($consulta);
+            $stmt->bindParam(':nombre', $nombre);
+            $stmt->bindParam(':apellidos',  $apellidos);
+            $stmt->bindParam(':telefono',      $telefono);
+            $stmt->bindParam(':email',      $email);
+            $stmt->bindParam(':direccion',    $direccion);
+            $stmt->bindParam(':nit',       $nit);
+            $stmt->bindParam(':clave',      $clave);
+            $stmt->bindParam(':nombreCompleto',      $nombreCompleto);
+            $stmt->execute();
+            echo '{"notice": {"text": "Cliente agregado"}';
+        } catch(PDOException $e){
+            echo '{"error": {"text": '.$e->getMessage().'}';
+        }
+    } else {
+        echo '{"error": {"text": ya existe en base de datos}';
     }
+
 });
 
 
 // Actualizar Cliente
 $app->put('/api/clientes/actualizar/{id}', function(Request $request, Response $response){
-    $id = $request->getAttribute('id');
+    $nit = $request->getAttribute('nit');
     $nombre = $request->getParam('nombre');
-    $apellidos = $request->getParam('apellidos');
+    $apellido = $request->getParam('apellido');
     $telefono = $request->getParam('telefono');
     $email = $request->getParam('email');
     $direccion = $request->getParam('direccion');
-    $ciudad = $request->getParam('ciudad');
-    $departamento = $request->getParam('departamento');
+    $clave = $request->getParam('clave');
+    $nombreCompleto = $request->getParam('nombreCompleto');
 
 
      $consulta = "UPDATE clientes SET
-				nombre 	        = :nombre,
-				apellidos 	    = :apellidos,
+				Nombre 	        = :nombre,
+				Apellido 	    = :apellido,
                 telefono	    = :telefono,
                 email		    = :email,
-                direccion   	= :direccion,
-                ciudad 		    = :ciudad,
-                departamento    = :departamento
-			WHERE id = $id";
+                Direccion   	= :direccion,
+                Clave 		    = :clave,
+                NombreCompleto    = :nombreCompleto
+			WHERE NIT = $nit";
 
 
     try{
