@@ -16,6 +16,10 @@ $app->get('/hello/{name}', function (Request $request, Response $response) {
 
 
 require "../src/routes/clientes.php";
+require "../src/routes/productos.php";
+require "../src/routes/categoria.php";
+require "../src/routes/provedor.php";
+require "../src/routes/venta.php";
 
 
 $app->run();

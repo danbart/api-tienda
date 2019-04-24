@@ -64,7 +64,12 @@ $app->post('/api/clientes/agregar', function(Request $request, Response $respons
 
     //consulta si existe el nit para que no existan repetidos
     $consulta = "SELECT * FROM cliente WHERE NIT='$nit'";
-    if($consulta==""){
+    $db = new db();
+    // Conexión
+    $db = $db->conectar();
+    $ejecutar = $db->query($consulta);
+    
+    if($ejecutar==""){
         
         $consulta = "INSERT INTO cliente (Nombre, Apellido, Telefono, Email, Direccion, NIT, Clave, NombreCompleto) VALUES
         (:nombre, :apellido, :telefono, :email, :direccion, :nit, :clave, :nombreCompleto)";
