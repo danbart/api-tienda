@@ -2,15 +2,15 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$app = new \Slim\App;
+//$app = new \Slim\App;
 
 //Obtener todos los clientes
-$app->get('/api/clientes', function(Request $request, Response $response){
+$app->get('/api/clientes/', function(Request $request, Response $response){
     $consulta = "SELECT * FROM cliente";
     try{
         // Instanciar la base de datos
         $db = new db();
-
+        
         // Conexión
         $db = $db->conectar();
         $ejecutar = $db->query($consulta);
@@ -18,10 +18,11 @@ $app->get('/api/clientes', function(Request $request, Response $response){
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        echo json_encode($clientes);
+        return $response->withJson($clientes);
 
     } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 });
 
@@ -42,16 +43,17 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        echo json_encode($cliente);
+        return $response->withJson($cliente);
         
     } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 });
 
 
 // Agregar Cliente
-$app->post('/api/clientes/agregar', function(Request $request, Response $response){
+$app->post('/api/clientes/add', function(Request $request, Response $response){
     $nit = $request->getParam('nit');
     $nombre = $request->getParam('nombre');
     $apellido = $request->getParam('apellido');
@@ -59,7 +61,7 @@ $app->post('/api/clientes/agregar', function(Request $request, Response $respons
     $email = $request->getParam('email');
     $direccion = $request->getParam('direccion');
     $nombreCompleto = $request->getParam('nombreCompleto');
-    $clave = $request->getParam('clave');
+    $clave = md5($request->getParam('clave'));
 
 
     //consulta si existe el nit para que no existan repetidos
@@ -91,10 +93,12 @@ $app->post('/api/clientes/agregar', function(Request $request, Response $respons
             $stmt->execute();
             echo '{"notice": {"text": "Cliente agregado"}';
         } catch(PDOException $e){
-            echo '{"error": {"text": '.$e->getMessage().'}';
+            $err= array('error' => $e->getMessage(), 'status'=> 500);
+            return $response->withJson($err, 500);
         }
     } else {
-        echo '{"error": {"text": ya existe en base de datos}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 
 });
@@ -140,26 +144,7 @@ $app->put('/api/clientes/actualizar/{id}', function(Request $request, Response $
         $stmt->execute();
         echo '{"notice": {"text": "Cliente actualizado"}';
     } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
-    }
-});
-
-
-// Borrar cliente
-$app->delete('/api/clientes/borrar/{id}', function(Request $request, Response $response){
-    $id = $request->getAttribute('id');
-    $sql = "DELETE FROM clientes WHERE id = $id";
-    try{
-        // Instanciar la base de datos
-        $db = new db();
-
-        // Conexion
-        $db = $db->conectar();
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-        $db = null;
-        echo '{"notice": {"text": "Cliente borrado"}';
-    } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 });

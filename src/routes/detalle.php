@@ -4,9 +4,9 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 // $app = new \Slim\App;
 
-//Obtener todos los venta
-$app->get('/api/venta/', function(Request $request, Response $response){
-    $consulta = "SELECT * FROM venta";
+//Obtener todos los detalle
+$app->get('/api/detalle/', function(Request $request, Response $response){
+    $consulta = "SELECT * FROM detalle";
     try{
         // Instanciar la base de datos
         $db = new db();
@@ -14,11 +14,12 @@ $app->get('/api/venta/', function(Request $request, Response $response){
         // Conexión
         $db = $db->conectar();
         $ejecutar = $db->query($consulta);
-        $venta = $ejecutar->fetchAll(PDO::FETCH_OBJ);
+        $detalle = $ejecutar->fetchAll(PDO::FETCH_OBJ);
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        return $response->withJson($venta);
+        // echo json_encode($detalle);
+        return $response->withJson($detalle);
 
     } catch(PDOException $e){
         $err= array('error' => $e->getMessage(), 'status'=> 500);
@@ -26,12 +27,12 @@ $app->get('/api/venta/', function(Request $request, Response $response){
     }
 });
 
-//Obtener un solo venta
-$app->get('/api/venta/{id}', function(Request $request, Response $response){
+//Obtener un solo detalle
+$app->get('/api/detalle/{id}', function(Request $request, Response $response){
 
     $id = $request->getAttribute('id');
 
-    $consulta = "SELECT * FROM venta WHERE NumPedido='$id'";
+    $consulta = "SELECT * FROM detalle WHERE NumPedido='$id'";
     try{
         // Instanciar la base de datos
         $db = new db();
@@ -39,11 +40,11 @@ $app->get('/api/venta/{id}', function(Request $request, Response $response){
         // Conexión
         $db = $db->conectar();
         $ejecutar = $db->query($consulta);
-        $venta = $ejecutar->fetchAll(PDO::FETCH_OBJ);
+        $detalle = $ejecutar->fetchAll(PDO::FETCH_OBJ);
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        return $response->withJson($venta);
+        return $response->withJson($detalle);
         
     } catch(PDOException $e){
         $err= array('error' => $e->getMessage(), 'status'=> 500);
@@ -51,18 +52,15 @@ $app->get('/api/venta/{id}', function(Request $request, Response $response){
     }
 });
 
-// Agregar venta
-$app->post('/api/venta/agregar', function(Request $request, Response $response){
+// Agregar detalle
+$app->post('/api/detalle/add', function(Request $request, Response $response){
     $numPedido = $request->getParam('numPedido');
-    $fecha = $request->getParam('fecha');
-    $nit = $request->getParam('nit');
-    $descuento = $request->getParam('descuento');
-    $totalPagar = $request->getParam('totalPagar');
-    $estado = $request->getParam('estado');
+    $codigoProd = $request->getParam('codigoProd');
+    $cantidadProductos = $request->getParam('cantidadProductos');
 
        
-        $consulta = "INSERT INTO venta (NumPedido, Fecha, NIT, Descuento, TotalPagar, Estado) VALUES
-        (:numPedido, :fecha, :nit, :descuento, :totalPagar, :estado)";
+        $consulta = "INSERT INTO detalle (NumPedido, CodigoProd, CantidadProductos) VALUES
+        (:numPedido, :codigoProd, :cantidadProductos)";
         try{
             // Instanciar la base de datos
             $db = new db();
@@ -71,13 +69,11 @@ $app->post('/api/venta/agregar', function(Request $request, Response $response){
             $db = $db->conectar();
             $stmt = $db->prepare($consulta);
             $stmt->bindParam(':numPedido', $numPedido);
-            $stmt->bindParam(':fecha',  $fecha);
-            $stmt->bindParam(':nit',      $nit);
-            $stmt->bindParam(':descuento',      $descuento);
-            $stmt->bindParam(':totalPagar',    $totalPagar);
-            $stmt->bindParam(':estado',       $estado);
+            $stmt->bindParam(':codigoProd',  $codigoProd);
+            $stmt->bindParam(':cantidadProductos',      $cantidadProductos);
             $stmt->execute();
-            echo '{"notice": {"text": "venta agregada"}';
+            $resp = array('result'=>'detalle agregada', 'status' => 200);
+            return $response->withJson($resp);
         } catch(PDOException $e){
             $err= array('error' => $e->getMessage(), 'status'=> 500);
             return $response->withJson($err, 500);

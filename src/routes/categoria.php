@@ -2,10 +2,10 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-$app = new \Slim\App;
+// $app = new \Slim\App;
 
 //Obtener todos los categoria
-$app->get('/api/categoria', function(Request $request, Response $response){
+$app->get('/api/categoria/', function(Request $request, Response $response){
     $consulta = "SELECT * FROM categoria";
     try{
         // Instanciar la base de datos
@@ -18,10 +18,11 @@ $app->get('/api/categoria', function(Request $request, Response $response){
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        echo json_encode($categoria);
+        return $response->withJson($categoria);
 
     } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 });
 
@@ -42,9 +43,10 @@ $app->get('/api/categoria/{id}', function(Request $request, Response $response){
         $db = null;
 
         //Exportar y mostrar en formato JSON
-        echo json_encode($categoria);
+        return $response->withJson($categoria);
         
     } catch(PDOException $e){
-        echo '{"error": {"text": '.$e->getMessage().'}';
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
     }
 });

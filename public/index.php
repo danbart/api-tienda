@@ -5,7 +5,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require '../vendor/autoload.php';
 require '../src/config/db.php';
 
-$app = new \Slim\App;
+
+$app = new \Slim\App();
 $app->get('/hello/{name}', function (Request $request, Response $response) {
     $name = $request->getAttribute('name');
     $response->getBody()->write("Hello, $name");
@@ -20,6 +21,7 @@ require "../src/routes/productos.php";
 require "../src/routes/categoria.php";
 require "../src/routes/provedor.php";
 require "../src/routes/venta.php";
+require "../src/routes/detalle.php";
 
 
 $app->run();
