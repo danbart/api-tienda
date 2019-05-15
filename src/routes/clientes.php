@@ -53,8 +53,8 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
 
 
 // Agregar Cliente
-$app->post('/api/clientes/add', function(Request $request, Response $response){
-    $nit = $request->getParam('nit');
+$app->post('/api/registro/', function(Request $request, Response $response){
+    $nit = $request->getParam('tarjeta');
     $nombre = $request->getParam('nombre');
     $apellido = $request->getParam('apellido');
     $telefono = $request->getParam('Telefono');
@@ -71,7 +71,7 @@ $app->post('/api/clientes/add', function(Request $request, Response $response){
     $db = $db->conectar();
     $ejecutar = $db->query($consulta);
     
-    if($ejecutar==""){
+    if($ejecutar===""){
         
         $consulta = "INSERT INTO cliente (Nombre, Apellido, Telefono, Email, Direccion, NIT, Clave, NombreCompleto) VALUES
         (:nombre, :apellido, :telefono, :email, :direccion, :nit, :clave, :nombreCompleto)";
@@ -91,13 +91,16 @@ $app->post('/api/clientes/add', function(Request $request, Response $response){
             $stmt->bindParam(':clave',      $clave);
             $stmt->bindParam(':nombreCompleto',      $nombreCompleto);
             $stmt->execute();
-            echo '{"notice": {"text": "Cliente agregado"}';
+            
+            $data= array('message' => 'Usuario Registrado con Exito', 'status'=> 200);
+            return $response->withJson($data);
+
         } catch(PDOException $e){
             $err= array('error' => $e->getMessage(), 'status'=> 500);
             return $response->withJson($err, 500);
         }
     } else {
-        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        $err= array('error' => 'El numero de Tarjeta ya Existe', 'status'=> 500);
         return $response->withJson($err, 500);
     }
 
