@@ -121,7 +121,6 @@ $app->put('/api/clientes/actualizar/{id}', function(Request $request, Response $
     $telefono = $request->getParam('telefono');
     $email = $request->getParam('email');
     $direccion = $request->getParam('direccion');
-    $clave = $request->getParam('clave');
     $nombreCompleto = $request->getParam('nombreCompleto');
 
 
@@ -131,7 +130,6 @@ $app->put('/api/clientes/actualizar/{id}', function(Request $request, Response $
                 telefono	    = :telefono,
                 email		    = :email,
                 Direccion   	= :direccion,
-                Clave 		    = :clave,
                 NombreCompleto    = :nombreCompleto
 			WHERE NIT = $nit";
 
@@ -144,14 +142,59 @@ $app->put('/api/clientes/actualizar/{id}', function(Request $request, Response $
         $db = $db->conectar();
         $stmt = $db->prepare($consulta);
         $stmt->bindParam(':nombre', $nombre);
-        $stmt->bindParam(':apellidos',  $apellidos);
+        $stmt->bindParam(':apellido',  $apellido);
         $stmt->bindParam(':telefono',      $telefono);
         $stmt->bindParam(':email',      $email);
         $stmt->bindParam(':direccion',    $direccion);
         $stmt->bindParam(':ciudad',       $ciudad);
         $stmt->bindParam(':departamento',      $departamento);
         $stmt->execute();
-        echo '{"notice": {"text": "Cliente actualizado"}';
+        
+        $data= array('message' => 'Usuario Actualizado con Exito', 'status'=> 200);
+        return $response->withJson($data);
+
+    } catch(PDOException $e){
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
+    }
+});
+
+
+//login del usuario
+$app->post('/api/login/', function(Request $request, Response $response){
+    $nombre = $request->getParam('usuario');
+    $clave = md5($request->getParam('clave'));
+    
+    //comprobamos Usuario
+    if(!$nombre){
+        $err= array('error' => 'Usuario es Necesario', 'status'=> 500);
+        return $response->withJson($err, 500);
+    }
+
+    //comprobamos Clave
+    if(!$request->getParam('clave')){
+        $err= array('error' => 'Clave es Necesaria', 'status'=> 500);
+        return $response->withJson($err, 500);
+    }
+
+    //consulta si existe el nit para que no existan repetidos
+    $consulta = "SELECT NIT as tarjeta, Nombre, Apellido, Telefono, Email, NombreCompleto, Direccion FROM cliente WHERE Clave='$clave' and Nombre='$nombre'";
+    try{        
+        $db = new db();
+        // Conexión
+        $db = $db->conectar();
+        $ejecutar = $db->query($consulta);
+        $user = $ejecutar->fetchAll(PDO::FETCH_CLASS);
+        
+        //si los datos no coinciden envia un mensaje de error
+        if(!$user){
+                $err= array('error' => 'Usuario no existe', 'status'=> 500);
+                return $response->withJson($err, 500);
+            }
+        
+        return $response->withJson($user);
+
+
     } catch(PDOException $e){
         $err= array('error' => $e->getMessage(), 'status'=> 500);
         return $response->withJson($err, 500);
