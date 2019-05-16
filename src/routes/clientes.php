@@ -57,7 +57,7 @@ $app->post('/api/registro/', function(Request $request, Response $response){
     $nit = $request->getParam('tarjeta');
     $nombre = $request->getParam('nombre');
     $apellido = $request->getParam('apellido');
-    $telefono = $request->getParam('Telefono');
+    $telefono = $request->getParam('telefono');
     $email = $request->getParam('email');
     $direccion = $request->getParam('direccion');
     $nombreCompleto = $request->getParam('nombreCompleto');
@@ -65,13 +65,22 @@ $app->post('/api/registro/', function(Request $request, Response $response){
 
 
     //consulta si existe el nit para que no existan repetidos
-    $consulta = "SELECT * FROM cliente WHERE NIT='$nit'";
-    $db = new db();
-    // Conexión
-    $db = $db->conectar();
-    $ejecutar = $db->query($consulta);
+    $consulta = "SELECT COUNT(*) FROM cliente WHERE NIT='$nit' or Nombre='$nombre'";
+    try{        
+        $db = new db();
+        // Conexión
+        $db = $db->conectar();
+        $ejecutar = $db->query($consulta);
+        $num = $ejecutar->fetchColumn();
+        if($num>0){
+                $err= array('error' => 'El numero de Tarjeta o el nombre de usuario ya Existe', 'status'=> 500);
+                return $response->withJson($err, 500);
+            }
+    } catch(PDOException $e){
+        $err= array('error' => $e->getMessage(), 'status'=> 500);
+        return $response->withJson($err, 500);
+    }
     
-    if($ejecutar===""){
         
         $consulta = "INSERT INTO cliente (Nombre, Apellido, Telefono, Email, Direccion, NIT, Clave, NombreCompleto) VALUES
         (:nombre, :apellido, :telefono, :email, :direccion, :nit, :clave, :nombreCompleto)";
@@ -83,7 +92,7 @@ $app->post('/api/registro/', function(Request $request, Response $response){
             $db = $db->conectar();
             $stmt = $db->prepare($consulta);
             $stmt->bindParam(':nombre', $nombre);
-            $stmt->bindParam(':apellidos',  $apellidos);
+            $stmt->bindParam(':apellido',  $apellido);
             $stmt->bindParam(':telefono',      $telefono);
             $stmt->bindParam(':email',      $email);
             $stmt->bindParam(':direccion',    $direccion);
@@ -99,10 +108,7 @@ $app->post('/api/registro/', function(Request $request, Response $response){
             $err= array('error' => $e->getMessage(), 'status'=> 500);
             return $response->withJson($err, 500);
         }
-    } else {
-        $err= array('error' => 'El numero de Tarjeta ya Existe', 'status'=> 500);
-        return $response->withJson($err, 500);
-    }
+    
 
 });
 
