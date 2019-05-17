@@ -6,7 +6,7 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 //Obtener todos los clientes
 $app->get('/api/clientes/', function(Request $request, Response $response){
-    $consulta = "SELECT * FROM cliente";
+    $consulta = "SELECT NIT as tarjeta, Nombre, Apellido, Telefono, Email, NombreCompleto, Direccion FROM cliente";
     try{
         // Instanciar la base de datos
         $db = new db();
@@ -31,7 +31,7 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
 
     $id = $request->getAttribute('id');
 
-    $consulta = "SELECT * FROM cliente WHERE NIT='$id'";
+    $consulta = "SELECT NIT as tarjeta, Nombre, Apellido, Telefono, Email, NombreCompleto, Direccion FROM cliente WHERE NIT='$id'";
     try{
         // Instanciar la base de datos
         $db = new db();
