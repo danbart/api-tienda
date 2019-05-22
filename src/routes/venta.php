@@ -84,3 +84,36 @@ $app->post('/api/venta/agregar', function(Request $request, Response $response){
         }
 
 });
+
+// Confirmar venta
+$app->post('/api/venta/confirmar', function(Request $request, Response $response){ 
+    $fecha = date('d-m-Y');
+    $nit = $request->getParam('nit');
+    $descuento = 0;
+    $totalPagar = $request->getParam('totalPagar');
+    $estado = "Pendiente";
+    $cantidadProducto = $request->getParam('cantProd');
+    $codigoProd = $request->getParam('codigoProd');
+
+    if(isset($nit)&&isset($totalPagar)&&isset($cantidadProducto)&&isset($codigoProd)){
+        //Insertamos la venta
+        $venta = "INSERT INTO venta (Fecha, NIT, Descuento, TotalPagar, Estado) VALUES ('$fecha', '$nit', '$descuento', '$totalPagar', '$estado')";
+
+        try{
+            $db = new db();
+            $db = $db->conectar();
+            $result = $db->query($venta);
+        } catch(PDOException $e){
+            $err= array('error' => $e->getMessage(), 'status'=> 500);
+            return $response->withJson($err, 500);
+        }
+
+    }else{
+        $err= array('error' => 'Es necesario el envio de todos los campos', 'status'=> 500);
+        return $response->withJson($err, 500);
+    }
+
+
+
+
+});
